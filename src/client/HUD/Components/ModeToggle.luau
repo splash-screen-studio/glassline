@@ -117,7 +117,7 @@ function ModeToggle.create(parent: ScreenGui): ModeToggleWidget
                 local Shared = ReplicatedStorage:WaitForChild("Shared")
                 local PlaceConfig = require(Shared.PlaceConfig)
                 local mode = widget.isFunMode and PlaceConfig.GameModes.FUN or PlaceConfig.GameModes.RANKED
-                (toggleRemote :: RemoteEvent):FireServer(mode)
+                ;(toggleRemote :: RemoteEvent):FireServer(mode)
             end
         end
     end)
