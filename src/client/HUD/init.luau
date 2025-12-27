@@ -4,7 +4,7 @@
     Main HUD controller for Glassline
 ]]
 
-local VERSION = "1.0.0"
+local VERSION = "1.1.0"
 
 local Players = game:GetService("Players")
 
@@ -12,7 +12,6 @@ local HUD = {}
 
 -- Components
 local ScoreDisplay: any
-local DirectionIndicator: any
 local ProgressBar: any
 local DeathScreen: any
 local HUDConstants: any
@@ -20,7 +19,6 @@ local HUDConstants: any
 -- UI instances
 local screenGui: ScreenGui
 local scoreWidget: any
-local directionWidget: any
 local progressWidget: any
 local deathWidget: any
 
@@ -30,7 +28,6 @@ local vehicleIndicator: TextLabel?
 function HUD:init()
     HUDConstants = require(script.HUDConstants)
     ScoreDisplay = require(script.Components.ScoreDisplay)
-    DirectionIndicator = require(script.Components.DirectionIndicator)
     ProgressBar = require(script.Components.ProgressBar)
     DeathScreen = require(script.Components.DeathScreen)
 
@@ -46,7 +43,6 @@ function HUD:init()
 
     -- Create components
     scoreWidget = ScoreDisplay.create(screenGui)
-    directionWidget = DirectionIndicator.create(screenGui)
     progressWidget = ProgressBar.create(screenGui)
     deathWidget = DeathScreen.create(screenGui)
 
@@ -66,9 +62,7 @@ function HUD:updateProgress(position: number, total: number)
 end
 
 function HUD:updateDirectionState(state: string, multiplier: number)
-    if directionWidget then
-        directionWidget:setState(state, multiplier)
-    end
+    -- Direction indicator removed
 end
 
 function HUD:showDeathScreen(cause: string, runPoints: number)
