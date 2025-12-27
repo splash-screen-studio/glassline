@@ -4,7 +4,7 @@
     Player spawning and teleportation
 ]]
 
-local VERSION = "1.0.0"
+local VERSION = "1.1.0"
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
@@ -36,9 +36,10 @@ function SpawnService:onCharacterAdded(player: Player, character: Model)
     humanoid.WalkSpeed = PlaceConfig.Movement.baseRunSpeed
     humanoid.JumpPower = PlaceConfig.Movement.baseJumpPower
 
-    -- Position at spawn
-    rootPart.CFrame = CFrame.new(PlaceConfig.Spawn.position) *
-        CFrame.lookAt(Vector3.zero, PlaceConfig.Spawn.lookDirection)
+    -- Position at spawn, facing forward
+    local spawnPos = PlaceConfig.Spawn.position
+    local lookTarget = spawnPos + PlaceConfig.Spawn.lookDirection
+    rootPart.CFrame = CFrame.lookAt(spawnPos, lookTarget)
 
     print("[SpawnService]", player.Name, "spawned at start")
 end
@@ -55,9 +56,10 @@ function SpawnService:teleportToStart(player: Player)
     local rootPart = character:FindFirstChild("HumanoidRootPart") :: BasePart?
     if not rootPart then return end
 
-    -- Teleport to start position
-    rootPart.CFrame = CFrame.new(PlaceConfig.Spawn.position) *
-        CFrame.lookAt(Vector3.zero, PlaceConfig.Spawn.lookDirection)
+    -- Teleport to start position, facing forward
+    local spawnPos = PlaceConfig.Spawn.position
+    local lookTarget = spawnPos + PlaceConfig.Spawn.lookDirection
+    rootPart.CFrame = CFrame.lookAt(spawnPos, lookTarget)
 
     -- Notify client
     Network.Events.PlayerRespawned:FireClient(player, {
