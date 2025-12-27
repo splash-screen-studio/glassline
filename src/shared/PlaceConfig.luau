@@ -102,10 +102,8 @@ PlaceConfig.Zones = {
 
 -- Vehicle spawn points
 PlaceConfig.VehicleSpawns = {
-    { position = 1000, vehicleType = "hoverboard" },
     { position = 2500, vehicleType = "rocket" },
     { position = 4000, vehicleType = "bouncer" },
-    { position = 5500, vehicleType = "hoverboard" },
     { position = 7000, vehicleType = "rocket" },
     { position = 8500, vehicleType = "bouncer" },
 }
