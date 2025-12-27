@@ -4,7 +4,7 @@
     Procedural generation of the glass corridor, floor, and obstacles
 ]]
 
-local VERSION = "2.0.0"
+local VERSION = "1.0.0"
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Lighting = game:GetService("Lighting")
@@ -141,80 +141,46 @@ function CorridorGenerator:generateObstacles()
     obstaclesFolder.Name = "Obstacles"
     obstaclesFolder.Parent = corridorFolder
 
-    local config = PlaceConfig.Corridor
-    local obsConfig = PlaceConfig.Obstacles or {
-        startClearZone = 500,
-        minSpacing = 25,
-        maxSpacing = 80,
-        minWidth = 0.8,
-        maxWidth = 2.5,
-    }
+    -- Generate obstacles for each zone
+    for _, zone in PlaceConfig.Zones do
+        local frequency = PlaceConfig.getObstacleFrequency(zone.difficulty)
+        local zoneLength = zone.endZ - zone.startZ
 
-    local currentZ = obsConfig.startClearZone
-    local obstacleCount = 0
+        -- Number of obstacles based on frequency
+        local numObstacles = math.floor(zoneLength * frequency / 10)
 
-    while currentZ < config.length do
-        -- Get difficulty at this position
-        local zone = PlaceConfig.getZoneAtPosition(currentZ)
-        local difficulty = zone and zone.difficulty or 1
+        for i = 1, numObstacles do
+            -- Random position within zone
+            local z = zone.startZ + math.random() * zoneLength
 
-        -- Spacing based on difficulty (tighter at higher difficulty)
-        local minSpace = math.max(obsConfig.minSpacing, 60 - difficulty * 4)
-        local maxSpace = math.max(obsConfig.minSpacing + 10, 90 - difficulty * 5)
-        local spacing = math.random(minSpace, maxSpace)
-
-        currentZ = currentZ + spacing
-        if currentZ >= config.length then break end
-
-        -- Pick random obstacle type based on difficulty
-        local obstacleDef = ObstacleDefinitions.getRandomForDifficulty(difficulty)
-        if obstacleDef then
-            local obstacle = self:createObstacle(obstacleDef, currentZ, difficulty)
-            obstacle.Parent = obstaclesFolder
-            obstacleCount = obstacleCount + 1
-
-            -- Sometimes add second obstacle at higher difficulties
-            if difficulty >= 4 and math.random() > 0.6 then
-                local secondDef = ObstacleDefinitions.getRandomForDifficulty(difficulty)
-                if secondDef and not secondDef.centered then
-                    local obstacle2 = self:createObstacle(secondDef, currentZ, difficulty)
-                    obstacle2.Parent = obstaclesFolder
-                    obstacleCount = obstacleCount + 1
-                end
+            -- Pick random obstacle type based on difficulty
+            local obstacleDef = ObstacleDefinitions.getRandomForDifficulty(zone.difficulty)
+            if obstacleDef then
+                local obstacle = self:createObstacle(obstacleDef, z, zone.difficulty)
+                obstacle.Parent = obstaclesFolder
             end
         end
     end
 
-    print("[CorridorGenerator] Generated", obstacleCount, "obstacles across", #PlaceConfig.Zones, "zones")
+    print("[CorridorGenerator] Generated obstacles for", #PlaceConfig.Zones, "zones")
 end
 
 function CorridorGenerator:createObstacle(definition: ObstacleDefinitions.ObstacleDefinition, zPosition: number, difficulty: number): Instance
     local config = PlaceConfig.Corridor
-    local obsConfig = PlaceConfig.Obstacles or { minWidth = 0.8, maxWidth = 2.5 }
 
     -- Create obstacle part
     local obstacle = Instance.new("Part")
     obstacle.Name = definition.id
     obstacle.Anchored = true
-
-    -- Calculate position first
-    local maxX = (config.width / 2) - (definition.size.X / 2) - 0.5
-    local x = if definition.centered then 0 else (math.random() * 2 - 1) * maxX
-
-    -- Calculate width based on X position (skinnier at center)
-    local distFromCenter = math.abs(x)
-    local maxDist = config.width / 2
-    local normalizedDist = math.clamp(distFromCenter / maxDist, 0, 1)
-    local maxAllowedWidth = obsConfig.minWidth + (obsConfig.maxWidth - obsConfig.minWidth) * normalizedDist
-
-    -- Clamp obstacle width based on position
-    local adjustedWidth = math.min(definition.size.X, maxAllowedWidth)
-    obstacle.Size = Vector3.new(adjustedWidth, definition.size.Y, definition.size.Z)
-
+    obstacle.Size = definition.size
     obstacle.Color = definition.color
     obstacle.Material = definition.material or Enum.Material.SmoothPlastic
 
-    local y = obstacle.Size.Y / 2 + 0.5 -- Slightly above floor
+    -- Position (random X within corridor width, adjusted for obstacle width)
+    local maxX = (config.width / 2) - (definition.size.X / 2) - 0.5
+    local x = if definition.centered then 0 else (math.random() * 2 - 1) * maxX
+    local y = definition.size.Y / 2 + 0.5 -- Slightly above floor
+
     obstacle.Position = Vector3.new(x, y, zPosition)
 
     -- Tag for death detection

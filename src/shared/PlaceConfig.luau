@@ -29,7 +29,7 @@ PlaceConfig.Corridor = {
     height = 50,                -- Tall glass ceiling (studs)
     length = 10000,             -- Very long corridor (studs)
     wallThickness = 1,          -- Glass wall thickness (studs)
-    wallTransparency = 0.7,     -- Glass transparency (0-1) - very see-through
+    wallTransparency = 0.3,     -- Glass transparency (0-1)
     wallColor = Color3.fromRGB(200, 220, 255), -- Slight blue tint
     floorMaterial = Enum.Material.SmoothPlastic,
     ceilingMaterial = Enum.Material.Glass,
@@ -38,30 +38,14 @@ PlaceConfig.Corridor = {
 -- Movement settings
 PlaceConfig.Movement = {
     baseRunSpeed = 80,          -- Very fast running (studs/s)
-    baseJumpPower = 200,        -- High jumping for obstacles
+    baseJumpPower = 80,         -- Very fast jumping
     vehicleSpeedMultiplier = 1.5,
     -- Roblox character settings
     characterSettings = {
         WalkSpeed = 80,
-        JumpPower = 200,
+        JumpPower = 80,
         MaxSlopeAngle = 89,     -- Can run up steep undulations
     },
-}
-
--- Avatar metrics (for difficulty calculations)
-PlaceConfig.Avatar = {
-    width = 2.0,              -- Shoulder width
-    height = 5.0,             -- Standing height
-    collisionRadius = 1.2,    -- Effective collision radius
-    reactionTime = 0.3,       -- Average human reaction (seconds)
-}
-
--- Passage requirements
-PlaceConfig.Passage = {
-    minGap = 2.5,             -- Minimum gap avatar can pass through
-    comfortGap = 3.0,         -- Comfortable passage width
-    tightGap = 2.2,           -- Tight but possible
-    impossibleGap = 1.8,      -- Cannot pass
 }
 
 -- Scoring system
@@ -132,55 +116,6 @@ PlaceConfig.EndZone = {
     sideAreaWidth = 20,         -- Width of side exploration areas
     sideAreaLength = 50,        -- Length of side areas
     teleportPosition = Vector3.new(0, 5, 0), -- Return to start position
-}
-
--- Predator system (dual predators per player)
-PlaceConfig.Predator = {
-    -- Starting positions (behind spawn)
-    hunterStartZ = -200,
-    stalkerStartZ = -220,
-
-    -- Chase timing
-    chaseDelay = 8,             -- Seconds before chase begins after spawn
-    catchDistance = 5,          -- Distance to trigger catch
-
-    -- Trap sequence
-    trapPauseDuration = 1.5,    -- Pause when player is trapped
-    trapJumpKill = true,        -- Jumping during trap = instant death
-
-    -- Speed
-    baseSpeed = 70,             -- Base predator speed (slightly slower than player)
-    catchUpSpeed = 85,          -- Speed when far behind
-
-    -- Variants (randomly assigned per player)
-    variants = {
-        { name = "The Devourer", primaryColor = Color3.fromRGB(180, 30, 30), secondaryColor = Color3.fromRGB(255, 100, 0) },
-        { name = "The Phantom", primaryColor = Color3.fromRGB(100, 50, 150), secondaryColor = Color3.fromRGB(200, 100, 255) },
-        { name = "The Crawler", primaryColor = Color3.fromRGB(30, 100, 30), secondaryColor = Color3.fromRGB(100, 255, 100) },
-        { name = "The Shade", primaryColor = Color3.fromRGB(20, 20, 50), secondaryColor = Color3.fromRGB(50, 50, 150) },
-        { name = "The Inferno", primaryColor = Color3.fromRGB(200, 80, 0), secondaryColor = Color3.fromRGB(255, 200, 50) },
-    },
-}
-
--- Game modes
-PlaceConfig.GameModes = {
-    RANKED = "ranked",          -- Predators active, points earned
-    FUN = "fun",                -- No predators, no death, no points
-}
-
--- Obstacle generation
-PlaceConfig.Obstacles = {
-    startClearZone = 500,       -- No obstacles in first 500 studs
-    minSpacing = 25,            -- Minimum studs between obstacles
-    maxSpacing = 80,            -- Maximum studs between obstacles
-    minWidth = 0.8,             -- Width at center (skinny)
-    maxWidth = 2.5,             -- Width at edges (wider)
-}
-
--- Respawn settings
-PlaceConfig.Respawn = {
-    time = 0.5,                 -- Respawn delay in seconds
-    deathScreenDuration = 0.25, -- How long death screen shows
 }
 
 -- Spawn configuration
