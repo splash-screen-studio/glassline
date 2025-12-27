@@ -6,7 +6,7 @@
     All services exported to _G for Studio debugging.
 ]]
 
-local VERSION = "1.0.0"
+local VERSION = "2.0.0"
 
 print("[Server v" .. VERSION .. "] Initializing Glassline...")
 
@@ -72,6 +72,16 @@ local CorridorGenerator = require(Server.Corridor.CorridorGenerator)
 CorridorGenerator:init()
 _G.CorridorGenerator = CorridorGenerator
 
+-- Step 5b: Terrain Generator
+local TerrainGenerator = require(Server.Corridor.TerrainGenerator)
+TerrainGenerator:init()
+_G.TerrainGenerator = TerrainGenerator
+
+-- Step 5c: Spawn Room Builder
+local SpawnRoomBuilder = require(Server.Corridor.SpawnRoomBuilder)
+SpawnRoomBuilder:init()
+_G.SpawnRoomBuilder = SpawnRoomBuilder
+
 -- Step 6: Vehicle Service
 local VehicleService = require(Server.Vehicle.VehicleService)
 VehicleService:init()
@@ -118,7 +128,9 @@ Players.PlayerRemoving:Connect(function(player)
     ScoreService:cleanupPlayer(player)
 end)
 
--- Generate the corridor
+-- Generate the world
+TerrainGenerator:generate()
+SpawnRoomBuilder:build()
 CorridorGenerator:generate()
 
 print("[Server v" .. VERSION .. "] Glassline initialized!")

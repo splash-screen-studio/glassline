@@ -7,7 +7,7 @@
     difficulty scaling, and visual zones.
 ]]
 
-local VERSION = "1.1.0"
+local VERSION = "1.2.0"
 
 export type Zone = {
     startZ: number,
@@ -120,8 +120,15 @@ PlaceConfig.EndZone = {
 
 -- Spawn configuration
 PlaceConfig.Spawn = {
-    position = Vector3.new(0, 0.5, -10),
+    position = Vector3.new(0, 3, -50),
     lookDirection = Vector3.new(0, 0, 1), -- Face forward (positive Z)
+}
+
+-- Spawn room dimensions
+PlaceConfig.SpawnRoom = {
+    depth = 80,
+    width = 20,
+    height = 20,
 }
 
 -- Lighting presets for zones (performance-friendly visuals)
