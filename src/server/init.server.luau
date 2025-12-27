@@ -6,7 +6,7 @@
     All services exported to _G for Studio debugging.
 ]]
 
-local VERSION = "1.0.0"
+local VERSION = "2.0.0"
 
 print("[Server v" .. VERSION .. "] Initializing Glassline...")
 
@@ -82,6 +82,17 @@ local SpawnService = require(Server.Character.SpawnService)
 SpawnService:init()
 _G.SpawnService = SpawnService
 
+-- Step 8: Game Mode Service
+local GameModeService = require(Server.GameMode.GameModeService)
+GameModeService:init()
+_G.GameModeService = GameModeService
+
+-- Step 9: Predator Service
+local PredatorService = require(Server.Predator.PredatorService)
+PredatorService:init()
+PredatorService:startLoop()
+_G.PredatorService = PredatorService
+
 -- Handle player joining
 Players.PlayerAdded:Connect(function(player)
     print("[Server] Player joined:", player.Name)
@@ -89,14 +100,24 @@ Players.PlayerAdded:Connect(function(player)
     -- Load player data
     PlayerDataService:loadPlayer(player)
 
-    -- Initialize run state
+    -- Initialize services for player
     RunService:initPlayer(player)
     ScoreService:initPlayer(player)
+    GameModeService:initPlayer(player)
+    PredatorService:setupPlayer(player)
 
     -- Wait for character
     player.CharacterAdded:Connect(function(character)
         SpawnService:onCharacterAdded(player, character)
         DeathService:setupCharacter(player, character)
+
+        -- Reset predators on respawn
+        PredatorService:resetPredators(player)
+
+        -- Apply game mode
+        if GameModeService:isFunMode(player) then
+            GameModeService:applyFunMode(player)
+        end
     end)
 
     -- Handle initial character if already exists
@@ -113,9 +134,11 @@ Players.PlayerRemoving:Connect(function(player)
     -- Save player data
     PlayerDataService:savePlayer(player)
 
-    -- Cleanup
+    -- Cleanup all services
     RunService:cleanupPlayer(player)
     ScoreService:cleanupPlayer(player)
+    GameModeService:cleanupPlayer(player)
+    PredatorService:cleanupPlayer(player)
 end)
 
 -- Generate the corridor

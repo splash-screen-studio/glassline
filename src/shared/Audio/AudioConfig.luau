@@ -19,12 +19,12 @@ AudioConfig.DefaultSettings = {
     muteAll = false,
 }
 
--- Music tracks (placeholder IDs - replace with real uploads)
+-- Music tracks
 AudioConfig.MusicTracks = {
     main_theme = {
         id = "main_theme",
-        soundId = "rbxassetid://0", -- Replace with uploaded music
-        name = "Glassline Theme",
+        soundId = "rbxassetid://126431844684249", -- Swept Ribbons (6:57 loop)
+        name = "Swept Ribbons",
         volume = 0.6,
         looped = true,
         fadeInTime = 1,

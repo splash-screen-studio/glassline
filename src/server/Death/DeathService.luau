@@ -6,7 +6,7 @@
     Touch any obstacle = instant death + respawn at start.
 ]]
 
-local VERSION = "1.0.0"
+local VERSION = "2.0.0"
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
@@ -19,6 +19,7 @@ local Network: any
 local PlayerDataService: any
 local RunService: any
 local ScoreService: any
+local GameModeService: any
 
 -- Obstacle tag
 local OBSTACLE_TAG = "GlasslineObstacle"
@@ -39,6 +40,14 @@ function DeathService:init()
     PlayerDataService = require(Server.Data.PlayerDataService)
     RunService = require(Server.Run.RunService)
     ScoreService = require(Server.Run.ScoreService)
+
+    -- Load GameModeService after delay to avoid circular dependency
+    task.defer(function()
+        local gameModeModule = Server:FindFirstChild("GameMode")
+        if gameModeModule then
+            GameModeService = require(gameModeModule.GameModeService)
+        end
+    end)
 
     print("[DeathService v" .. VERSION .. "] Initialized")
 end
@@ -92,6 +101,19 @@ function DeathService:onPartTouched(player: Player, character: Model, otherPart:
         return
     end
 
+    -- Check if in fun mode (no death)
+    if GameModeService and GameModeService:isFunMode(player) then
+        -- Bounce back instead of dying
+        local hrp = character:FindFirstChild("HumanoidRootPart") :: BasePart?
+        if hrp then
+            local bounceDir = (hrp.Position - otherPart.Position).Unit
+            bounceDir = Vector3.new(bounceDir.X * 0.5, 0.3, -5)
+            hrp.AssemblyLinearVelocity = bounceDir * 30
+        end
+        deathCooldowns[player] = now
+        return
+    end
+
     -- Get obstacle type from attribute
     local obstacleType = otherPart:GetAttribute("ObstacleType") or "obstacle"
 
@@ -130,8 +152,9 @@ function DeathService:onPlayerDied(player: Player, character: Model, cause: stri
     RunService:resetRun(player)
     ScoreService:resetRunPoints(player)
 
-    -- Respawn after delay (handled by Roblox or SpawnService)
-    task.delay(2, function()
+    -- Respawn after delay (using config)
+    local respawnDelay = PlaceConfig.Respawn and PlaceConfig.Respawn.time or 0.5
+    task.delay(respawnDelay, function()
         if player and player.Parent then
             self:respawnPlayer(player)
         end

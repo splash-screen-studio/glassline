@@ -4,7 +4,7 @@
     Main HUD controller for Glassline
 ]]
 
-local VERSION = "1.0.0"
+local VERSION = "2.0.0"
 
 local Players = game:GetService("Players")
 
@@ -15,6 +15,7 @@ local ScoreDisplay: any
 local DirectionIndicator: any
 local ProgressBar: any
 local DeathScreen: any
+local ModeToggle: any
 local HUDConstants: any
 
 -- UI instances
@@ -23,6 +24,7 @@ local scoreWidget: any
 local directionWidget: any
 local progressWidget: any
 local deathWidget: any
+local modeWidget: any
 
 -- State
 local vehicleIndicator: TextLabel?
@@ -33,6 +35,7 @@ function HUD:init()
     DirectionIndicator = require(script.Components.DirectionIndicator)
     ProgressBar = require(script.Components.ProgressBar)
     DeathScreen = require(script.Components.DeathScreen)
+    ModeToggle = require(script.Components.ModeToggle)
 
     -- Create screen GUI
     local player = Players.LocalPlayer
@@ -42,6 +45,7 @@ function HUD:init()
     screenGui.Name = "GlasslineHUD"
     screenGui.ResetOnSpawn = false
     screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.IgnoreGuiInset = true
     screenGui.Parent = playerGui
 
     -- Create components
@@ -49,6 +53,7 @@ function HUD:init()
     directionWidget = DirectionIndicator.create(screenGui)
     progressWidget = ProgressBar.create(screenGui)
     deathWidget = DeathScreen.create(screenGui)
+    modeWidget = ModeToggle.create(screenGui)
 
     print("[HUD v" .. VERSION .. "] Initialized")
 end
