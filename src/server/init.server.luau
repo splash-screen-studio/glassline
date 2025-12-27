@@ -72,6 +72,11 @@ local CorridorGenerator = require(Server.Corridor.CorridorGenerator)
 CorridorGenerator:init()
 _G.CorridorGenerator = CorridorGenerator
 
+-- Step 5b: Scenery Generator
+local SceneryGenerator = require(Server.Corridor.SceneryGenerator)
+SceneryGenerator:init()
+_G.SceneryGenerator = SceneryGenerator
+
 -- Step 6: Vehicle Service
 local VehicleService = require(Server.Vehicle.VehicleService)
 VehicleService:init()
@@ -141,7 +146,8 @@ Players.PlayerRemoving:Connect(function(player)
     PredatorService:cleanupPlayer(player)
 end)
 
--- Generate the corridor
+-- Generate the corridor and scenery
 CorridorGenerator:generate()
+SceneryGenerator:generate()
 
 print("[Server v" .. VERSION .. "] Glassline initialized!")
