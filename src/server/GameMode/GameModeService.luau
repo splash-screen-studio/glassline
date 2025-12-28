@@ -28,12 +28,34 @@ function GameModeService:init()
     PlaceConfig = require(Shared.PlaceConfig)
     Network = require(Shared.Network)
 
-    -- Create mode toggle remote if not exists
+    -- Seed random with time for true randomness
+    math.randomseed(os.time() + tick() * 1000)
+
     local folder = ReplicatedStorage:FindFirstChild("NetworkRemotes")
-    if folder and not folder:FindFirstChild("ToggleGameMode") then
-        local remote = Instance.new("RemoteEvent")
-        remote.Name = "ToggleGameMode"
-        remote.Parent = folder
+    if folder then
+        -- Create mode toggle remote
+        if not folder:FindFirstChild("ToggleGameMode") then
+            local remote = Instance.new("RemoteEvent")
+            remote.Name = "ToggleGameMode"
+            remote.Parent = folder
+        end
+
+        -- Create GetGameMode function for client queries
+        if not folder:FindFirstChild("GetGameMode") then
+            local remote = Instance.new("RemoteFunction")
+            remote.Name = "GetGameMode"
+            remote.Parent = folder
+            remote.OnServerInvoke = function(player)
+                return self:getMode(player)
+            end
+        end
+
+        -- Create GameModeChanged event
+        if not folder:FindFirstChild("GameModeChanged") then
+            local remote = Instance.new("RemoteEvent")
+            remote.Name = "GameModeChanged"
+            remote.Parent = folder
+        end
     end
 
     -- Listen for mode toggle requests
@@ -50,8 +72,21 @@ function GameModeService:init()
 end
 
 function GameModeService:initPlayer(player: Player)
-    -- Default to ranked mode
-    playerModes[player] = PlaceConfig.GameModes.RANKED
+    -- Randomly select mode
+    self:randomizeMode(player)
+end
+
+function GameModeService:randomizeMode(player: Player)
+    -- 90% ranked, 10% fun
+    local roll = math.random(1, 100)
+    local mode = if roll <= 90 then PlaceConfig.GameModes.RANKED else PlaceConfig.GameModes.FUN
+    print("[GameModeService] Random roll:", roll, "-> mode:", mode)
+    self:setMode(player, mode)
+end
+
+function GameModeService:onRespawn(player: Player)
+    -- Randomly select new mode on each respawn
+    self:randomizeMode(player)
 end
 
 function GameModeService:cleanupPlayer(player: Player)
@@ -74,19 +109,16 @@ function GameModeService:setMode(player: Player, mode: string)
         self:applyRankedMode(player)
     end
 
-    -- Notify client
+    -- Notify client via the remote we created in init
     local folder = ReplicatedStorage:FindFirstChild("NetworkRemotes")
     if folder then
         local modeChanged = folder:FindFirstChild("GameModeChanged")
-        if not modeChanged then
-            modeChanged = Instance.new("RemoteEvent")
-            modeChanged.Name = "GameModeChanged"
-            modeChanged.Parent = folder
+        if modeChanged then
+            (modeChanged :: RemoteEvent):FireClient(player, {
+                mode = mode,
+                previousMode = previousMode,
+            })
         end
-        (modeChanged :: RemoteEvent):FireClient(player, {
-            mode = mode,
-            previousMode = previousMode,
-        })
     end
 
     print("[GameModeService]", player.Name, "switched to", mode, "mode")

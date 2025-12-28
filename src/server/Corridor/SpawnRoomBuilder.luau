@@ -84,7 +84,28 @@ function SpawnRoomBuilder:build()
     ceiling.Color = Color3.fromRGB(40, 40, 50)
     ceiling.Parent = spawnRoom
 
-    -- Entry arch
+    -- Front walls (seal the sides, leaving only corridor-width opening)
+    local sideWallWidth = (roomWidth - corridorWidth) / 2
+
+    local frontLeftWall = Instance.new("Part")
+    frontLeftWall.Name = "FrontLeftWall"
+    frontLeftWall.Anchored = true
+    frontLeftWall.Size = Vector3.new(sideWallWidth, roomHeight, 1)
+    frontLeftWall.Position = Vector3.new(-roomWidth/2 + sideWallWidth/2, roomHeight/2, 0)
+    frontLeftWall.Material = Enum.Material.SmoothPlastic
+    frontLeftWall.Color = Color3.fromRGB(40, 40, 50)
+    frontLeftWall.Parent = spawnRoom
+
+    local frontRightWall = Instance.new("Part")
+    frontRightWall.Name = "FrontRightWall"
+    frontRightWall.Anchored = true
+    frontRightWall.Size = Vector3.new(sideWallWidth, roomHeight, 1)
+    frontRightWall.Position = Vector3.new(roomWidth/2 - sideWallWidth/2, roomHeight/2, 0)
+    frontRightWall.Material = Enum.Material.SmoothPlastic
+    frontRightWall.Color = Color3.fromRGB(40, 40, 50)
+    frontRightWall.Parent = spawnRoom
+
+    -- Entry arch (at the corridor opening)
     local archColor = Color3.fromRGB(0, 200, 255)
 
     local leftPillar = Instance.new("Part")
@@ -117,6 +138,367 @@ function SpawnRoomBuilder:build()
     light.Brightness = 1.5
     light.Range = 30
     light.Parent = topBeam
+
+    -- ========== DRAMATIC EXIT EFFECTS ==========
+
+    -- Ground fog layer (thick, low-lying)
+    local groundFogEmitter = Instance.new("Part")
+    groundFogEmitter.Name = "GroundFogEmitter"
+    groundFogEmitter.Anchored = true
+    groundFogEmitter.CanCollide = false
+    groundFogEmitter.Transparency = 1
+    groundFogEmitter.Size = Vector3.new(corridorWidth + 4, 1, 15)
+    groundFogEmitter.Position = Vector3.new(0, 0.5, 8)
+    groundFogEmitter.Parent = spawnRoom
+
+    local groundFog = Instance.new("ParticleEmitter")
+    groundFog.Name = "GroundFog"
+    groundFog.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 200, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 150, 200)),
+    })
+    groundFog.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 4),
+        NumberSequenceKeypoint.new(0.3, 8),
+        NumberSequenceKeypoint.new(0.7, 12),
+        NumberSequenceKeypoint.new(1, 15)
+    })
+    groundFog.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.4),
+        NumberSequenceKeypoint.new(0.3, 0.5),
+        NumberSequenceKeypoint.new(0.7, 0.7),
+        NumberSequenceKeypoint.new(1, 1)
+    })
+    groundFog.Lifetime = NumberRange.new(4, 7)
+    groundFog.Rate = 25
+    groundFog.Speed = NumberRange.new(1, 3)
+    groundFog.SpreadAngle = Vector2.new(60, 10)
+    groundFog.RotSpeed = NumberRange.new(-20, 20)
+    groundFog.Rotation = NumberRange.new(0, 360)
+    groundFog.LightEmission = 0.3
+    groundFog.LightInfluence = 0.3
+    groundFog.Drag = 0.5
+    groundFog.Parent = groundFogEmitter
+
+    -- Rising smoke columns (left side)
+    local smokeLeftEmitter = Instance.new("Part")
+    smokeLeftEmitter.Name = "SmokeLeftEmitter"
+    smokeLeftEmitter.Anchored = true
+    smokeLeftEmitter.CanCollide = false
+    smokeLeftEmitter.Transparency = 1
+    smokeLeftEmitter.Size = Vector3.new(2, 1, 4)
+    smokeLeftEmitter.Position = Vector3.new(-corridorWidth/2 - 1, 0.5, 3)
+    smokeLeftEmitter.Parent = spawnRoom
+
+    local smokeLeft = Instance.new("ParticleEmitter")
+    smokeLeft.Name = "RisingSmoke"
+    smokeLeft.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 200, 255)),
+        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100, 180, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 220, 255)),
+    })
+    smokeLeft.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 1),
+        NumberSequenceKeypoint.new(0.5, 3),
+        NumberSequenceKeypoint.new(1, 5)
+    })
+    smokeLeft.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.2),
+        NumberSequenceKeypoint.new(0.5, 0.5),
+        NumberSequenceKeypoint.new(1, 1)
+    })
+    smokeLeft.Lifetime = NumberRange.new(3, 5)
+    smokeLeft.Rate = 12
+    smokeLeft.Speed = NumberRange.new(4, 8)
+    smokeLeft.SpreadAngle = Vector2.new(15, 15)
+    smokeLeft.Acceleration = Vector3.new(0, 2, 2)
+    smokeLeft.RotSpeed = NumberRange.new(-40, 40)
+    smokeLeft.Rotation = NumberRange.new(0, 360)
+    smokeLeft.LightEmission = 0.5
+    smokeLeft.LightInfluence = 0.3
+    smokeLeft.Parent = smokeLeftEmitter
+
+    -- Rising smoke columns (right side)
+    local smokeRightEmitter = smokeLeftEmitter:Clone()
+    smokeRightEmitter.Name = "SmokeRightEmitter"
+    smokeRightEmitter.Position = Vector3.new(corridorWidth/2 + 1, 0.5, 3)
+    smokeRightEmitter.Parent = spawnRoom
+
+    -- Sparkle/dust particles floating in the air
+    local sparkleEmitter = Instance.new("Part")
+    sparkleEmitter.Name = "SparkleEmitter"
+    sparkleEmitter.Anchored = true
+    sparkleEmitter.CanCollide = false
+    sparkleEmitter.Transparency = 1
+    sparkleEmitter.Size = Vector3.new(corridorWidth, roomHeight/2, 10)
+    sparkleEmitter.Position = Vector3.new(0, roomHeight/3, 5)
+    sparkleEmitter.Parent = spawnRoom
+
+    local sparkles = Instance.new("ParticleEmitter")
+    sparkles.Name = "Sparkles"
+    sparkles.Color = ColorSequence.new(Color3.fromRGB(200, 240, 255))
+    sparkles.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0),
+        NumberSequenceKeypoint.new(0.2, 0.3),
+        NumberSequenceKeypoint.new(0.8, 0.3),
+        NumberSequenceKeypoint.new(1, 0)
+    })
+    sparkles.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 1),
+        NumberSequenceKeypoint.new(0.2, 0.3),
+        NumberSequenceKeypoint.new(0.8, 0.3),
+        NumberSequenceKeypoint.new(1, 1)
+    })
+    sparkles.Lifetime = NumberRange.new(2, 4)
+    sparkles.Rate = 30
+    sparkles.Speed = NumberRange.new(0.5, 2)
+    sparkles.SpreadAngle = Vector2.new(180, 180)
+    sparkles.LightEmission = 1
+    sparkles.LightInfluence = 0
+    sparkles.Parent = sparkleEmitter
+
+    -- Central dramatic smoke burst
+    local centralSmokeEmitter = Instance.new("Part")
+    centralSmokeEmitter.Name = "CentralSmokeEmitter"
+    centralSmokeEmitter.Anchored = true
+    centralSmokeEmitter.CanCollide = false
+    centralSmokeEmitter.Transparency = 1
+    centralSmokeEmitter.Size = Vector3.new(corridorWidth, 1, 3)
+    centralSmokeEmitter.Position = Vector3.new(0, 0.5, 2)
+    centralSmokeEmitter.Parent = spawnRoom
+
+    local centralSmoke = Instance.new("ParticleEmitter")
+    centralSmoke.Name = "CentralSmoke"
+    centralSmoke.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+        ColorSequenceKeypoint.new(0.3, Color3.fromRGB(150, 200, 255)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 150, 255)),
+    })
+    centralSmoke.Size = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 2),
+        NumberSequenceKeypoint.new(0.3, 5),
+        NumberSequenceKeypoint.new(0.6, 8),
+        NumberSequenceKeypoint.new(1, 10)
+    })
+    centralSmoke.Transparency = NumberSequence.new({
+        NumberSequenceKeypoint.new(0, 0.2),
+        NumberSequenceKeypoint.new(0.4, 0.4),
+        NumberSequenceKeypoint.new(0.7, 0.7),
+        NumberSequenceKeypoint.new(1, 1)
+    })
+    centralSmoke.Lifetime = NumberRange.new(3, 5)
+    centralSmoke.Rate = 20
+    centralSmoke.Speed = NumberRange.new(3, 7)
+    centralSmoke.SpreadAngle = Vector2.new(40, 20)
+    centralSmoke.Acceleration = Vector3.new(0, 1, 3)
+    centralSmoke.RotSpeed = NumberRange.new(-30, 30)
+    centralSmoke.Rotation = NumberRange.new(0, 360)
+    centralSmoke.LightEmission = 0.4
+    centralSmoke.LightInfluence = 0.4
+    centralSmoke.Parent = centralSmokeEmitter
+
+    -- ========== FLOOR GLOW EFFECTS ==========
+
+    -- Main floor glow strip at exit
+    local glowStrip = Instance.new("Part")
+    glowStrip.Name = "ExitGlow"
+    glowStrip.Anchored = true
+    glowStrip.CanCollide = false
+    glowStrip.Size = Vector3.new(corridorWidth, 0.3, 4)
+    glowStrip.Position = Vector3.new(0, 0.65, 4)
+    glowStrip.Material = Enum.Material.Neon
+    glowStrip.Color = archColor
+    glowStrip.Transparency = 0.2
+    glowStrip.Parent = spawnRoom
+
+    local glowLight = Instance.new("PointLight")
+    glowLight.Color = archColor
+    glowLight.Brightness = 4
+    glowLight.Range = 20
+    glowLight.Parent = glowStrip
+
+    -- Secondary glow strips (staggered)
+    for i = 1, 3 do
+        local strip = Instance.new("Part")
+        strip.Name = "GlowStrip" .. i
+        strip.Anchored = true
+        strip.CanCollide = false
+        strip.Size = Vector3.new(corridorWidth - i, 0.2, 0.5)
+        strip.Position = Vector3.new(0, 0.6, 4 + i * 3)
+        strip.Material = Enum.Material.Neon
+        strip.Color = archColor
+        strip.Transparency = 0.3 + i * 0.1
+        strip.Parent = spawnRoom
+
+        local light = Instance.new("PointLight")
+        light.Color = archColor
+        light.Brightness = 2 - i * 0.3
+        light.Range = 12 - i * 2
+        light.Parent = strip
+    end
+
+    -- Pulsing effect for the glow strips
+    task.spawn(function()
+        local strips = {glowStrip}
+        for i = 1, 3 do
+            local s = spawnRoom:FindFirstChild("GlowStrip" .. i)
+            if s then table.insert(strips, s) end
+        end
+
+        local time = 0
+        while glowStrip.Parent do
+            time = time + task.wait(0.03)
+            for idx, strip in strips do
+                local phase = time * 3 + idx * 0.5
+                strip.Transparency = 0.15 + math.sin(phase) * 0.2
+            end
+        end
+    end)
+
+    -- ========== LIGHT BEAMS ==========
+
+    -- Volumetric-style light beams (left)
+    local beamLeft = Instance.new("Part")
+    beamLeft.Name = "LightBeamLeft"
+    beamLeft.Anchored = true
+    beamLeft.CanCollide = false
+    beamLeft.Size = Vector3.new(0.5, roomHeight, 0.5)
+    beamLeft.Position = Vector3.new(-corridorWidth/2 + 0.5, roomHeight/2, 1)
+    beamLeft.Material = Enum.Material.Neon
+    beamLeft.Color = archColor
+    beamLeft.Transparency = 0.6
+    beamLeft.Parent = spawnRoom
+
+    local beamLeftLight = Instance.new("PointLight")
+    beamLeftLight.Color = archColor
+    beamLeftLight.Brightness = 2
+    beamLeftLight.Range = 10
+    beamLeftLight.Parent = beamLeft
+
+    -- Volumetric-style light beams (right)
+    local beamRight = beamLeft:Clone()
+    beamRight.Name = "LightBeamRight"
+    beamRight.Position = Vector3.new(corridorWidth/2 - 0.5, roomHeight/2, 1)
+    beamRight.Parent = spawnRoom
+
+    -- Animated color-cycling for beams
+    task.spawn(function()
+        local time = 0
+        while beamLeft.Parent do
+            time = time + task.wait(0.05)
+            local hue = (time * 0.1) % 1
+            local color = Color3.fromHSV(hue, 0.5, 1)
+            beamLeft.Color = color
+            beamRight.Color = color
+            beamLeftLight.Color = color
+            local rightLight = beamRight:FindFirstChildOfClass("PointLight")
+            if rightLight then rightLight.Color = color end
+        end
+    end)
+
+    -- ========== SPOTLIGHTS ==========
+
+    -- Main spotlight beam pointing down the corridor
+    local spotlightPart = Instance.new("Part")
+    spotlightPart.Name = "SpotlightMount"
+    spotlightPart.Anchored = true
+    spotlightPart.CanCollide = false
+    spotlightPart.Transparency = 1
+    spotlightPart.Size = Vector3.new(1, 1, 1)
+    spotlightPart.Position = Vector3.new(0, roomHeight - 2, 0)
+    spotlightPart.Parent = spawnRoom
+
+    local spotlight = Instance.new("SpotLight")
+    spotlight.Brightness = 5
+    spotlight.Range = 80
+    spotlight.Angle = 50
+    spotlight.Color = archColor
+    spotlight.Face = Enum.NormalId.Front
+    spotlight.Parent = spotlightPart
+
+    -- Side spotlights (dramatic cross-lighting)
+    local spotLeft = Instance.new("Part")
+    spotLeft.Name = "SpotlightLeft"
+    spotLeft.Anchored = true
+    spotLeft.CanCollide = false
+    spotLeft.Transparency = 1
+    spotLeft.Size = Vector3.new(1, 1, 1)
+    spotLeft.Position = Vector3.new(-corridorWidth/2, roomHeight - 3, -2)
+    spotLeft.CFrame = CFrame.new(spotLeft.Position, Vector3.new(corridorWidth/2, 0, 10))
+    spotLeft.Parent = spawnRoom
+
+    local spotLeftLight = Instance.new("SpotLight")
+    spotLeftLight.Brightness = 3
+    spotLeftLight.Range = 50
+    spotLeftLight.Angle = 35
+    spotLeftLight.Color = Color3.fromRGB(255, 100, 150)
+    spotLeftLight.Face = Enum.NormalId.Front
+    spotLeftLight.Parent = spotLeft
+
+    local spotRight = spotLeft:Clone()
+    spotRight.Name = "SpotlightRight"
+    spotRight.Position = Vector3.new(corridorWidth/2, roomHeight - 3, -2)
+    spotRight.CFrame = CFrame.new(spotRight.Position, Vector3.new(-corridorWidth/2, 0, 10))
+    local spotRightLight = spotRight:FindFirstChildOfClass("SpotLight")
+    if spotRightLight then spotRightLight.Color = Color3.fromRGB(100, 150, 255) end
+    spotRight.Parent = spawnRoom
+
+    -- Animated spotlight sweep
+    task.spawn(function()
+        local time = 0
+        while spotLeft.Parent do
+            time = time + task.wait(0.03)
+            local angle = math.sin(time * 0.8) * 20
+            spotLeft.CFrame = CFrame.new(spotLeft.Position) * CFrame.Angles(0, math.rad(angle), 0) * CFrame.Angles(math.rad(30), 0, 0)
+            spotRight.CFrame = CFrame.new(spotRight.Position) * CFrame.Angles(0, math.rad(-angle), 0) * CFrame.Angles(math.rad(30), 0, 0)
+        end
+    end)
+
+    -- ========== CEILING EFFECTS ==========
+
+    -- Ceiling glow panels
+    for i = 0, 2 do
+        local ceilingGlow = Instance.new("Part")
+        ceilingGlow.Name = "CeilingGlow" .. i
+        ceilingGlow.Anchored = true
+        ceilingGlow.CanCollide = false
+        ceilingGlow.Size = Vector3.new(2, 0.3, 2)
+        ceilingGlow.Position = Vector3.new((i - 1) * 2.5, roomHeight - 0.5, 2)
+        ceilingGlow.Material = Enum.Material.Neon
+        ceilingGlow.Color = archColor
+        ceilingGlow.Transparency = 0.4
+        ceilingGlow.Parent = spawnRoom
+
+        local cLight = Instance.new("PointLight")
+        cLight.Color = archColor
+        cLight.Brightness = 3
+        cLight.Range = 15
+        cLight.Parent = ceilingGlow
+    end
+
+    -- Corridor walls extending from spawn room to main corridor
+    -- These seal the sides so player can only go through the corridor
+    local corridorWallLength = 100  -- Extend walls into the corridor area
+
+    local corridorLeftWall = Instance.new("Part")
+    corridorLeftWall.Name = "CorridorLeftWall"
+    corridorLeftWall.Anchored = true
+    corridorLeftWall.Size = Vector3.new(1, roomHeight, corridorWallLength)
+    corridorLeftWall.Position = Vector3.new(-corridorWidth/2 - 0.5, roomHeight/2, corridorWallLength/2)
+    corridorLeftWall.Material = Enum.Material.Glass
+    corridorLeftWall.Color = Color3.fromRGB(200, 220, 255)
+    corridorLeftWall.Transparency = 0.5
+    corridorLeftWall.Parent = spawnRoom
+
+    local corridorRightWall = Instance.new("Part")
+    corridorRightWall.Name = "CorridorRightWall"
+    corridorRightWall.Anchored = true
+    corridorRightWall.Size = Vector3.new(1, roomHeight, corridorWallLength)
+    corridorRightWall.Position = Vector3.new(corridorWidth/2 + 0.5, roomHeight/2, corridorWallLength/2)
+    corridorRightWall.Material = Enum.Material.Glass
+    corridorRightWall.Color = Color3.fromRGB(200, 220, 255)
+    corridorRightWall.Transparency = 0.5
+    corridorRightWall.Parent = spawnRoom
 
     -- SpawnLocation
     local spawn = workspace:FindFirstChild("SpawnLocation")

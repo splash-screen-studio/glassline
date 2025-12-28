@@ -67,6 +67,11 @@ local DeathService = require(Server.Death.DeathService)
 DeathService:init()
 _G.DeathService = DeathService
 
+-- Step 4b: Game Mode Service
+local GameModeService = require(Server.GameMode.GameModeService)
+GameModeService:init()
+_G.GameModeService = GameModeService
+
 -- Step 5: Corridor System
 local CorridorGenerator = require(Server.Corridor.CorridorGenerator)
 CorridorGenerator:init()
@@ -102,11 +107,14 @@ Players.PlayerAdded:Connect(function(player)
     -- Initialize run state
     RunService:initPlayer(player)
     ScoreService:initPlayer(player)
+    GameModeService:initPlayer(player)
 
     -- Wait for character
     player.CharacterAdded:Connect(function(character)
         SpawnService:onCharacterAdded(player, character)
         DeathService:setupCharacter(player, character)
+        -- Randomize mode on each spawn/respawn
+        GameModeService:onRespawn(player)
     end)
 
     -- Handle initial character if already exists
@@ -126,6 +134,7 @@ Players.PlayerRemoving:Connect(function(player)
     -- Cleanup
     RunService:cleanupPlayer(player)
     ScoreService:cleanupPlayer(player)
+    GameModeService:cleanupPlayer(player)
 end)
 
 -- Generate the world

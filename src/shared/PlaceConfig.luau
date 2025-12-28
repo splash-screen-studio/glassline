@@ -7,7 +7,7 @@
     difficulty scaling, and visual zones.
 ]]
 
-local VERSION = "1.2.0"
+local VERSION = "2.0.0"
 
 export type Zone = {
     startZ: number,
@@ -48,16 +48,36 @@ PlaceConfig.Movement = {
     },
 }
 
--- Scoring system
+-- Scoring system (velocity-based)
 PlaceConfig.Scoring = {
-    forwardMultiplier = 1,      -- Normal points going forward
-    backwardMultiplier = 2,     -- Double points going backward (after reaching end)
-    pointsPerStud = 1,          -- 1 point per stud of progress
+    -- Velocity thresholds
+    velocityThreshold = 40,         -- Must be above this speed (studs/s) for positive points
+    velocitySampleWindow = 0.2,     -- Seconds to average velocity over
+
+    -- Point rates (per second)
+    basePointsPerSecond = 50,       -- Points/s at threshold speed
+    maxPointsPerSecond = 200,       -- Points/s at max speed
+    maxVelocityBonus = 120,         -- Velocity above threshold for max points
+
+    -- Penalties (per second) - HARD
+    penaltyStanding = -80,          -- Standing still
+    penaltyWrongDirection = -100,   -- Going wrong way
+    penaltySlowSpeed = -40,         -- Below threshold but moving right direction
+    penaltyBump = -150,             -- Sudden deceleration (bump)
+    bumpDecelThreshold = 30,        -- Speed drop/s that counts as bump
+
+    -- Multipliers
+    forwardMultiplier = 1,          -- Normal points going forward
+    backwardMultiplier = 2,         -- Double points going backward (after reaching end)
+
     -- Direction states
     states = {
-        FORWARD = "forward",    -- Default, points for forward movement
-        BACKWARD = "backward",  -- After reaching end, 2x for backward
+        FORWARD = "forward",        -- Default, points for forward movement
+        BACKWARD = "backward",      -- After reaching end, 2x for backward
     },
+
+    -- Minimum points (can't go below 0)
+    minimumPoints = 0,
 }
 
 -- Progressive difficulty
@@ -114,6 +134,12 @@ PlaceConfig.EndZone = {
     sideAreaWidth = 20,         -- Width of side exploration areas
     sideAreaLength = 50,        -- Length of side areas
     teleportPosition = Vector3.new(0, 5, 0), -- Return to start position
+}
+
+-- Game modes
+PlaceConfig.GameModes = {
+    RANKED = "ranked",      -- Points earned, death enabled, predators active
+    FUN = "fun",            -- No death, no points, practice mode
 }
 
 -- Spawn configuration

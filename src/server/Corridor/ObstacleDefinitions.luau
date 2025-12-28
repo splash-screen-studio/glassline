@@ -4,7 +4,7 @@
     Obstacle type definitions for the glass corridor
 ]]
 
-local VERSION = "1.0.0"
+local VERSION = "2.0.0"
 
 local ObstacleDefinitions = {}
 
@@ -14,6 +14,15 @@ export type MovementConfig = {
     speed: number?,         -- Movement speed
     distance: number?,      -- Distance/amplitude of movement
     amplitude: number?,     -- Angle amplitude for swing
+}
+
+-- Visual effects configuration
+export type VisualConfig = {
+    glowColor: Color3?,     -- Color for point light glow
+    glowBrightness: number?, -- Light brightness (default 2)
+    glowRange: number?,     -- Light range (default 8)
+    particles: string?,     -- Particle type: "sparks", "flames", "electric", "smoke"
+    pulseSpeed: number?,    -- Speed of pulsing effect (0 = no pulse)
 }
 
 -- Obstacle definition
@@ -27,7 +36,16 @@ export type ObstacleDefinition = {
     centered: boolean?,     -- If true, always centered in corridor
     minDifficulty: number,  -- Minimum difficulty to appear
     movement: MovementConfig?, -- Movement config for moving obstacles
+    visuals: VisualConfig?,  -- Visual effects config
 }
+
+-- Danger colors
+local DANGER_RED = Color3.fromRGB(255, 30, 30)
+local DANGER_ORANGE = Color3.fromRGB(255, 100, 0)
+local DANGER_MAGENTA = Color3.fromRGB(255, 0, 150)
+local DANGER_YELLOW = Color3.fromRGB(255, 200, 0)
+local ELECTRIC_BLUE = Color3.fromRGB(0, 150, 255)
+local TOXIC_GREEN = Color3.fromRGB(100, 255, 0)
 
 -- Static obstacles
 local StaticObstacles: { ObstacleDefinition } = {
@@ -37,18 +55,34 @@ local StaticObstacles: { ObstacleDefinition } = {
         name = "Low Wall",
         obstacleType = "wall",
         size = Vector3.new(5, 3, 1),
-        color = Color3.fromRGB(150, 50, 50),
+        color = DANGER_RED,
+        material = Enum.Material.Neon,
         centered = true,
         minDifficulty = 1,
+        visuals = {
+            glowColor = DANGER_RED,
+            glowBrightness = 3,
+            glowRange = 12,
+            particles = "sparks",
+            pulseSpeed = 2,
+        },
     },
     {
         id = "wall_high",
         name = "High Wall",
         obstacleType = "wall",
         size = Vector3.new(5, 6, 1),
-        color = Color3.fromRGB(180, 50, 50),
+        color = DANGER_MAGENTA,
+        material = Enum.Material.Neon,
         centered = true,
         minDifficulty = 3,
+        visuals = {
+            glowColor = DANGER_MAGENTA,
+            glowBrightness = 4,
+            glowRange = 15,
+            particles = "electric",
+            pulseSpeed = 3,
+        },
     },
 
     -- Pillars (partial blockage, weave around)
@@ -57,17 +91,31 @@ local StaticObstacles: { ObstacleDefinition } = {
         name = "Left Pillar",
         obstacleType = "pillar",
         size = Vector3.new(2, 8, 2),
-        color = Color3.fromRGB(100, 100, 100),
+        color = DANGER_ORANGE,
+        material = Enum.Material.Neon,
         minDifficulty = 1,
+        visuals = {
+            glowColor = DANGER_ORANGE,
+            glowBrightness = 2,
+            glowRange = 10,
+            particles = "flames",
+        },
     },
     {
         id = "pillar_center",
         name = "Center Pillar",
         obstacleType = "pillar",
         size = Vector3.new(2, 8, 2),
-        color = Color3.fromRGB(100, 100, 100),
+        color = DANGER_ORANGE,
+        material = Enum.Material.Neon,
         centered = true,
         minDifficulty = 2,
+        visuals = {
+            glowColor = DANGER_ORANGE,
+            glowBrightness = 2,
+            glowRange = 10,
+            particles = "flames",
+        },
     },
 
     -- Spikes (low, must jump)
@@ -75,11 +123,18 @@ local StaticObstacles: { ObstacleDefinition } = {
         id = "spikes",
         name = "Floor Spikes",
         obstacleType = "spike",
-        size = Vector3.new(4, 1, 2),
-        color = Color3.fromRGB(200, 100, 50),
-        material = Enum.Material.Metal,
+        size = Vector3.new(4, 1.5, 2),
+        color = DANGER_YELLOW,
+        material = Enum.Material.Neon,
         centered = true,
         minDifficulty = 1,
+        visuals = {
+            glowColor = DANGER_YELLOW,
+            glowBrightness = 3,
+            glowRange = 8,
+            particles = "sparks",
+            pulseSpeed = 4,
+        },
     },
 
     -- Low beams (duck/slide under)
@@ -88,9 +143,17 @@ local StaticObstacles: { ObstacleDefinition } = {
         name = "Low Beam",
         obstacleType = "beam",
         size = Vector3.new(6, 1, 1),
-        color = Color3.fromRGB(80, 80, 80),
+        color = ELECTRIC_BLUE,
+        material = Enum.Material.Neon,
         centered = true,
         minDifficulty = 4,
+        visuals = {
+            glowColor = ELECTRIC_BLUE,
+            glowBrightness = 3,
+            glowRange = 12,
+            particles = "electric",
+            pulseSpeed = 5,
+        },
     },
 }
 
@@ -101,15 +164,22 @@ local MovingObstacles: { ObstacleDefinition } = {
         id = "pendulum",
         name = "Swinging Pendulum",
         obstacleType = "pendulum",
-        size = Vector3.new(1, 10, 1),
-        color = Color3.fromRGB(150, 150, 200),
-        material = Enum.Material.Metal,
+        size = Vector3.new(1.5, 10, 1.5),
+        color = DANGER_MAGENTA,
+        material = Enum.Material.Neon,
         centered = true,
         minDifficulty = 3,
         movement = {
             type = "swing",
             speed = 2,
             amplitude = 45,
+        },
+        visuals = {
+            glowColor = DANGER_MAGENTA,
+            glowBrightness = 4,
+            glowRange = 15,
+            particles = "electric",
+            pulseSpeed = 2,
         },
     },
 
@@ -119,12 +189,20 @@ local MovingObstacles: { ObstacleDefinition } = {
         name = "Sliding Wall",
         obstacleType = "sliding",
         size = Vector3.new(3, 5, 1),
-        color = Color3.fromRGB(200, 150, 100),
+        color = DANGER_RED,
+        material = Enum.Material.Neon,
         minDifficulty = 4,
         movement = {
             type = "slide",
             speed = 3,
             distance = 2,
+        },
+        visuals = {
+            glowColor = DANGER_RED,
+            glowBrightness = 3,
+            glowRange = 12,
+            particles = "sparks",
+            pulseSpeed = 3,
         },
     },
 
@@ -134,13 +212,21 @@ local MovingObstacles: { ObstacleDefinition } = {
         name = "Rising Block",
         obstacleType = "riser",
         size = Vector3.new(4, 2, 2),
-        color = Color3.fromRGB(100, 150, 200),
+        color = TOXIC_GREEN,
+        material = Enum.Material.Neon,
         centered = true,
         minDifficulty = 5,
         movement = {
             type = "rise",
             speed = 2,
             distance = 6,
+        },
+        visuals = {
+            glowColor = TOXIC_GREEN,
+            glowBrightness = 3,
+            glowRange = 10,
+            particles = "smoke",
+            pulseSpeed = 2,
         },
     },
 
@@ -149,14 +235,21 @@ local MovingObstacles: { ObstacleDefinition } = {
         id = "rotator",
         name = "Rotating Bar",
         obstacleType = "rotating",
-        size = Vector3.new(5, 1, 1),
-        color = Color3.fromRGB(200, 100, 150),
-        material = Enum.Material.Metal,
+        size = Vector3.new(5, 1.2, 1.2),
+        color = ELECTRIC_BLUE,
+        material = Enum.Material.Neon,
         centered = true,
         minDifficulty = 6,
         movement = {
             type = "rotate",
             speed = 3,
+        },
+        visuals = {
+            glowColor = ELECTRIC_BLUE,
+            glowBrightness = 4,
+            glowRange = 15,
+            particles = "electric",
+            pulseSpeed = 6,
         },
     },
 
@@ -166,12 +259,20 @@ local MovingObstacles: { ObstacleDefinition } = {
         name = "Fast Slider",
         obstacleType = "sliding",
         size = Vector3.new(2, 6, 1),
-        color = Color3.fromRGB(255, 100, 100),
+        color = DANGER_MAGENTA,
+        material = Enum.Material.Neon,
         minDifficulty = 8,
         movement = {
             type = "slide",
             speed = 6,
             distance = 2.5,
+        },
+        visuals = {
+            glowColor = DANGER_MAGENTA,
+            glowBrightness = 5,
+            glowRange = 18,
+            particles = "flames",
+            pulseSpeed = 8,
         },
     },
 
@@ -180,15 +281,22 @@ local MovingObstacles: { ObstacleDefinition } = {
         id = "double_pendulum",
         name = "Double Pendulum",
         obstacleType = "pendulum",
-        size = Vector3.new(1, 12, 1),
-        color = Color3.fromRGB(200, 50, 200),
-        material = Enum.Material.Metal,
+        size = Vector3.new(1.5, 12, 1.5),
+        color = DANGER_YELLOW,
+        material = Enum.Material.Neon,
         centered = true,
         minDifficulty = 10,
         movement = {
             type = "swing",
             speed = 4,
             amplitude = 60,
+        },
+        visuals = {
+            glowColor = DANGER_YELLOW,
+            glowBrightness = 5,
+            glowRange = 20,
+            particles = "flames",
+            pulseSpeed = 4,
         },
     },
 }

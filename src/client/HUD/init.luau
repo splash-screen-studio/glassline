@@ -4,7 +4,7 @@
     Main HUD controller for Glassline
 ]]
 
-local VERSION = "1.1.0"
+local VERSION = "2.0.0"
 
 local Players = game:GetService("Players")
 
@@ -49,9 +49,9 @@ function HUD:init()
     print("[HUD v" .. VERSION .. "] Initialized")
 end
 
-function HUD:updateScore(runPoints: number, lifetimePoints: number, multiplier: number)
+function HUD:updateScore(runPoints: number, lifetimePoints: number, multiplier: number, pointRate: number?, speed: number?, gameMode: string?, highestZ: number?, isNewGround: boolean?)
     if scoreWidget then
-        scoreWidget:update(runPoints, lifetimePoints, multiplier)
+        scoreWidget:update(runPoints, lifetimePoints, multiplier, pointRate, speed, gameMode, highestZ, isNewGround)
     end
 end
 

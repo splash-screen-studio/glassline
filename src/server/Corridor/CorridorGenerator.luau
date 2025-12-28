@@ -141,6 +141,9 @@ function CorridorGenerator:generateObstacles()
     obstaclesFolder.Name = "Obstacles"
     obstaclesFolder.Parent = corridorFolder
 
+    -- No obstacles in the first 200 studs (safe zone after spawn)
+    local SAFE_ZONE_END = 200
+
     -- Generate obstacles for each zone
     for _, zone in PlaceConfig.Zones do
         local frequency = PlaceConfig.getObstacleFrequency(zone.difficulty)
@@ -153,6 +156,11 @@ function CorridorGenerator:generateObstacles()
             -- Random position within zone
             local z = zone.startZ + math.random() * zoneLength
 
+            -- Skip if in safe zone
+            if z < SAFE_ZONE_END then
+                continue
+            end
+
             -- Pick random obstacle type based on difficulty
             local obstacleDef = ObstacleDefinitions.getRandomForDifficulty(zone.difficulty)
             if obstacleDef then
@@ -162,7 +170,7 @@ function CorridorGenerator:generateObstacles()
         end
     end
 
-    print("[CorridorGenerator] Generated obstacles for", #PlaceConfig.Zones, "zones")
+    print("[CorridorGenerator] Generated obstacles for", #PlaceConfig.Zones, "zones (safe zone: 0-" .. SAFE_ZONE_END .. ")")
 end
 
 function CorridorGenerator:createObstacle(definition: ObstacleDefinitions.ObstacleDefinition, zPosition: number, difficulty: number): Instance
@@ -186,12 +194,137 @@ function CorridorGenerator:createObstacle(definition: ObstacleDefinitions.Obstac
     -- Tag for death detection
     DeathService:tagObstacle(obstacle, definition.obstacleType)
 
+    -- Add visual effects
+    if definition.visuals then
+        self:addObstacleVisuals(obstacle, definition.visuals)
+    end
+
     -- Add movement for moving obstacles
     if definition.movement then
         self:addObstacleMovement(obstacle, definition.movement, difficulty)
     end
 
     return obstacle
+end
+
+function CorridorGenerator:addObstacleVisuals(obstacle: BasePart, visuals: ObstacleDefinitions.VisualConfig)
+    -- Add glow light
+    if visuals.glowColor then
+        local light = Instance.new("PointLight")
+        light.Color = visuals.glowColor
+        light.Brightness = visuals.glowBrightness or 2
+        light.Range = visuals.glowRange or 8
+        light.Shadows = false
+        light.Parent = obstacle
+    end
+
+    -- Add particle effects
+    if visuals.particles then
+        local emitter = Instance.new("ParticleEmitter")
+        emitter.Name = "DangerParticles"
+
+        if visuals.particles == "sparks" then
+            emitter.Color = ColorSequence.new(visuals.glowColor or Color3.fromRGB(255, 200, 0))
+            emitter.Size = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0.3),
+                NumberSequenceKeypoint.new(1, 0),
+            })
+            emitter.Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(1, 1),
+            })
+            emitter.Lifetime = NumberRange.new(0.2, 0.5)
+            emitter.Rate = 20
+            emitter.Speed = NumberRange.new(5, 15)
+            emitter.SpreadAngle = Vector2.new(180, 180)
+            emitter.LightEmission = 1
+            emitter.LightInfluence = 0
+
+        elseif visuals.particles == "flames" then
+            emitter.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 200, 50)),
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 100, 0)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 20, 0)),
+            })
+            emitter.Size = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0.5),
+                NumberSequenceKeypoint.new(0.3, 1),
+                NumberSequenceKeypoint.new(1, 0),
+            })
+            emitter.Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0.2),
+                NumberSequenceKeypoint.new(0.5, 0.5),
+                NumberSequenceKeypoint.new(1, 1),
+            })
+            emitter.Lifetime = NumberRange.new(0.3, 0.6)
+            emitter.Rate = 30
+            emitter.Speed = NumberRange.new(3, 8)
+            emitter.SpreadAngle = Vector2.new(20, 20)
+            emitter.Acceleration = Vector3.new(0, 10, 0)
+            emitter.LightEmission = 1
+            emitter.LightInfluence = 0
+
+        elseif visuals.particles == "electric" then
+            emitter.Color = ColorSequence.new(visuals.glowColor or Color3.fromRGB(100, 200, 255))
+            emitter.Size = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0.1),
+                NumberSequenceKeypoint.new(0.5, 0.4),
+                NumberSequenceKeypoint.new(1, 0),
+            })
+            emitter.Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0),
+                NumberSequenceKeypoint.new(0.8, 0.3),
+                NumberSequenceKeypoint.new(1, 1),
+            })
+            emitter.Lifetime = NumberRange.new(0.1, 0.3)
+            emitter.Rate = 40
+            emitter.Speed = NumberRange.new(10, 25)
+            emitter.SpreadAngle = Vector2.new(180, 180)
+            emitter.LightEmission = 1
+            emitter.LightInfluence = 0
+            emitter.RotSpeed = NumberRange.new(-500, 500)
+
+        elseif visuals.particles == "smoke" then
+            emitter.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, visuals.glowColor or Color3.fromRGB(100, 255, 100)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 50, 50)),
+            })
+            emitter.Size = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0.5),
+                NumberSequenceKeypoint.new(0.5, 1.5),
+                NumberSequenceKeypoint.new(1, 2),
+            })
+            emitter.Transparency = NumberSequence.new({
+                NumberSequenceKeypoint.new(0, 0.3),
+                NumberSequenceKeypoint.new(0.5, 0.6),
+                NumberSequenceKeypoint.new(1, 1),
+            })
+            emitter.Lifetime = NumberRange.new(1, 2)
+            emitter.Rate = 10
+            emitter.Speed = NumberRange.new(1, 3)
+            emitter.SpreadAngle = Vector2.new(30, 30)
+            emitter.Acceleration = Vector3.new(0, 2, 0)
+            emitter.LightEmission = 0.5
+            emitter.LightInfluence = 0.5
+        end
+
+        emitter.Parent = obstacle
+    end
+
+    -- Add pulsing effect
+    if visuals.pulseSpeed and visuals.pulseSpeed > 0 then
+        task.spawn(function()
+            local baseTransparency = obstacle.Transparency
+            local speed = visuals.pulseSpeed
+            local time = math.random() * math.pi * 2 -- Random start phase
+
+            while obstacle.Parent do
+                time = time + task.wait() * speed
+                -- Pulse between 0 and 0.3 transparency
+                obstacle.Transparency = baseTransparency + math.sin(time) * 0.15 + 0.15
+            end
+        end)
+    end
 end
 
 function CorridorGenerator:addObstacleMovement(obstacle: BasePart, movement: ObstacleDefinitions.MovementConfig, difficulty: number)
