@@ -26,10 +26,25 @@ function MusicService:init()
     local Shared = ReplicatedStorage:WaitForChild("Shared")
     AudioConfig = require(Shared.Audio.AudioConfig)
 
-    -- Create music folder
-    musicFolder = Instance.new("Folder")
-    musicFolder.Name = "Music"
-    musicFolder.Parent = SoundService
+    -- Clean up any stray sounds in SoundService (prevents duplicate music)
+    for _, child in SoundService:GetChildren() do
+        if child:IsA("Sound") or (child:IsA("Folder") and child.Name ~= "Music") then
+            child:Destroy()
+        end
+    end
+
+    -- Create music folder (or reuse existing)
+    musicFolder = SoundService:FindFirstChild("Music") :: Folder
+    if not musicFolder then
+        musicFolder = Instance.new("Folder")
+        musicFolder.Name = "Music"
+        musicFolder.Parent = SoundService
+    else
+        -- Clear any existing music
+        for _, child in musicFolder:GetChildren() do
+            child:Destroy()
+        end
+    end
 
     print("[MusicService v" .. VERSION .. "] Initialized")
 end
