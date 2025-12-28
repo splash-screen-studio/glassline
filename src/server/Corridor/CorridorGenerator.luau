@@ -92,7 +92,7 @@ function CorridorGenerator:generateWalls()
         leftWall.Anchored = true
         leftWall.Size = Vector3.new(config.wallThickness, config.height, length)
         leftWall.Position = Vector3.new(-config.width / 2 - config.wallThickness / 2, config.height / 2, z + length / 2)
-        leftWall.Material = Enum.Material.Glass
+        leftWall.Material = config.wallMaterial or Enum.Material.SmoothPlastic
         leftWall.Color = config.wallColor
         leftWall.Transparency = config.wallTransparency
         leftWall.CanCollide = true
@@ -104,7 +104,7 @@ function CorridorGenerator:generateWalls()
         rightWall.Anchored = true
         rightWall.Size = Vector3.new(config.wallThickness, config.height, length)
         rightWall.Position = Vector3.new(config.width / 2 + config.wallThickness / 2, config.height / 2, z + length / 2)
-        rightWall.Material = Enum.Material.Glass
+        rightWall.Material = config.wallMaterial or Enum.Material.SmoothPlastic
         rightWall.Color = config.wallColor
         rightWall.Transparency = config.wallTransparency
         rightWall.CanCollide = true

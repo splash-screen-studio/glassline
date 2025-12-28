@@ -29,10 +29,11 @@ PlaceConfig.Corridor = {
     height = 50,                -- Tall glass ceiling (studs)
     length = 10000,             -- Very long corridor (studs)
     wallThickness = 1,          -- Glass wall thickness (studs)
-    wallTransparency = 0.3,     -- Glass transparency (0-1)
+    wallTransparency = 0.85,    -- Crystal clear (NOT frosted)
     wallColor = Color3.fromRGB(200, 220, 255), -- Slight blue tint
+    wallMaterial = Enum.Material.SmoothPlastic, -- NOT Glass (has frost effect)
     floorMaterial = Enum.Material.SmoothPlastic,
-    ceilingMaterial = Enum.Material.Glass,
+    ceilingMaterial = Enum.Material.SmoothPlastic, -- Crystal clear ceiling too
 }
 
 -- Movement settings

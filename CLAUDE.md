@@ -567,3 +567,46 @@ ProfileService = "etheroit/profileservice@1.2.0"
 [dev-dependencies]
 TestEZ = "roblox/testez@0.4.1"
 ```
+
+---
+
+## Known Issues & Fixes
+
+### Crystal Clear Glass (NOT Frosted)
+The corridor walls must be crystal clear to see the scenery. If glass appears frosted:
+
+1. **Check Lighting.Atmosphere** - Remove or set `Density = 0`, `Haze = 0`
+2. **Check wall Transparency** - Should be `0.8` or higher for crystal clear
+3. **Check wall Material** - `Glass` material has built-in frost effect. Use `SmoothPlastic` with high transparency for truly clear walls
+4. **PlaceConfig.Corridor.wallTransparency** - Increase to 0.8+
+
+```lua
+-- Crystal clear glass settings
+wall.Material = Enum.Material.SmoothPlastic  -- NOT Glass (has frost)
+wall.Transparency = 0.85                      -- High transparency
+wall.Color = Color3.fromRGB(200, 220, 255)   -- Subtle blue tint
+```
+
+### Particle Effects Bleeding
+Smoke/fog particle effects must NOT extend into the corridor. Keep emitters:
+- Inside spawn room only
+- With short Lifetime (< 3 seconds)
+- With limited SpreadAngle
+
+---
+
+## Publish Log
+
+All publishes to Roblox via rbxcloud must be logged here with commit hash.
+
+| Date | Commit | Version | Notes |
+|------|--------|---------|-------|
+| 2024-12-27 | `114eed1` | v1.0.0 | Initial ship - velocity scoring, dangerous obstacles, spawn room effects |
+
+### Publishing Checklist
+Before each publish:
+1. `git status` - ensure clean working tree
+2. `git log -1 --oneline` - note commit hash
+3. Test in Studio - verify core gameplay works
+4. `rbxcloud experience publish` - publish to Roblox
+5. Update this log with commit hash and notes
