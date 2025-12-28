@@ -77,10 +77,12 @@ function GameModeService:initPlayer(player: Player)
 end
 
 function GameModeService:randomizeMode(player: Player)
-    -- 90% ranked, 10% fun
-    local roll = math.random(1, 100)
-    local mode = if roll <= 90 then PlaceConfig.GameModes.RANKED else PlaceConfig.GameModes.FUN
-    print("[GameModeService] Random roll:", roll, "-> mode:", mode)
+    -- FUN MODE DISABLED FOR NOW - always ranked
+    -- TODO: Re-enable fun mode later (was 90% ranked, 10% fun)
+    -- local roll = math.random(1, 100)
+    -- local mode = if roll <= 90 then PlaceConfig.GameModes.RANKED else PlaceConfig.GameModes.FUN
+    local mode = PlaceConfig.GameModes.RANKED
+    print("[GameModeService] Mode:", mode, "(fun mode disabled)")
     self:setMode(player, mode)
 end
 
