@@ -140,45 +140,7 @@ function SpawnRoomBuilder:build()
     light.Parent = topBeam
 
     -- ========== DRAMATIC EXIT EFFECTS ==========
-
-    -- Ground fog layer (thick, low-lying)
-    local groundFogEmitter = Instance.new("Part")
-    groundFogEmitter.Name = "GroundFogEmitter"
-    groundFogEmitter.Anchored = true
-    groundFogEmitter.CanCollide = false
-    groundFogEmitter.Transparency = 1
-    groundFogEmitter.Size = Vector3.new(corridorWidth + 4, 1, 15)
-    groundFogEmitter.Position = Vector3.new(0, 0.5, 8)
-    groundFogEmitter.Parent = spawnRoom
-
-    local groundFog = Instance.new("ParticleEmitter")
-    groundFog.Name = "GroundFog"
-    groundFog.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(180, 200, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 150, 200)),
-    })
-    groundFog.Size = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 4),
-        NumberSequenceKeypoint.new(0.3, 8),
-        NumberSequenceKeypoint.new(0.7, 12),
-        NumberSequenceKeypoint.new(1, 15)
-    })
-    groundFog.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.4),
-        NumberSequenceKeypoint.new(0.3, 0.5),
-        NumberSequenceKeypoint.new(0.7, 0.7),
-        NumberSequenceKeypoint.new(1, 1)
-    })
-    groundFog.Lifetime = NumberRange.new(4, 7)
-    groundFog.Rate = 25
-    groundFog.Speed = NumberRange.new(1, 3)
-    groundFog.SpreadAngle = Vector2.new(60, 10)
-    groundFog.RotSpeed = NumberRange.new(-20, 20)
-    groundFog.Rotation = NumberRange.new(0, 360)
-    groundFog.LightEmission = 0.3
-    groundFog.LightInfluence = 0.3
-    groundFog.Drag = 0.5
-    groundFog.Parent = groundFogEmitter
+    -- NOTE: Ground fog removed - was fogging up the corridor glass
 
     -- Rising smoke columns (left side)
     local smokeLeftEmitter = Instance.new("Part")
